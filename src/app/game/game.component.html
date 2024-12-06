@@ -1,0 +1,16 @@
+<div *ngIf="!gameId">
+    <button (click)="createGame()">Create New Game</button>
+    <button (click)="joinGame()">Join Game</button>
+  </div>
+  
+  <div *ngIf="gameId">
+    <h2>Game Code: <strong>{{ gameId }}</strong></h2> <!-- Display the Game Code -->
+    <ngx-chess-board
+      #board
+      [showCoordinates]="true"
+      [dragEnabled]="!isOpponentTurn"
+      (moveChange)="onMoveChange($event)"
+    ></ngx-chess-board>
+    <h3 *ngIf="isOpponentTurn">Waiting for opponent's move...</h3>
+  </div>
+  

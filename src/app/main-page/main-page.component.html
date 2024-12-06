@@ -1,0 +1,13 @@
+<div class="chess-match-container">
+    <h1>Chess Match</h1>
+    <div class="controls">
+      <button class="btn-reset" (click)="resetGame()">Create New Game</button>
+      <p>Current Turn: {{ currentTurn === 'PLAYER_ONE' ? 'White (Player 1)' : 'Black (Player 2)' }}</p>
+    </div>
+  
+    <div class="iframes-container">
+      <iframe src="/player1" name="iframe1" class="iframe"></iframe>
+      <iframe src="/player2" name="iframe2" class="iframe"></iframe>
+    </div>
+  </div>
+  

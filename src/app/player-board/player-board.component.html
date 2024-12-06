@@ -1,0 +1,14 @@
+<div class="player-board-container">
+    <!-- Chessboard Wrapper -->
+    <div class="board-wrapper" [ngClass]="{ disabled: isDisabled }">
+      <ngx-chess-board
+        #board
+        (moveChange)="onMoveChange($event)"
+        [dragDisabled]="isDisabled"
+      ></ngx-chess-board>
+    </div>
+  
+    <!-- Disabled Overlay -->
+    <div *ngIf="isDisabled" class="overlay">Waiting for your turn...</div>
+  </div>
+  
