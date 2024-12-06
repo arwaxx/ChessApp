@@ -50,11 +50,12 @@ import { environment } from './firebaseConfig';
 import { GameComponent } from './game/game.component';
 
 const routes: Routes = [
-  { path: '', component: MainPageComponent },
+  { path: '', component: MainPageComponent }, // Default route
   { path: 'player1', component: PlayerBoardComponent, data: { playerName: 'PLAYER_ONE' } },
   { path: 'player2', component: PlayerBoardComponent, data: { playerName: 'PLAYER_TWO' } },
-  { path: 'game', component: GameComponent },
+  { path: 'game', component: GameComponent }, // Route for the GameComponent
 ];
+
 
 
 @NgModule({

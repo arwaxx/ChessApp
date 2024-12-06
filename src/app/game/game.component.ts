@@ -15,6 +15,11 @@ export class GameComponent {
   isOpponentTurn: boolean = false; // Determines if the opponent is playing
 
   constructor(private db: Database) {}
+  ngOnInit() {
+    this.gameId = null; // Reset gameId
+    console.log('Game ID reset:', this.gameId); 
+  }
+  
 
   // Create a new game
   createGame() {
@@ -40,7 +45,7 @@ export class GameComponent {
     this.listenForGameUpdates();
   }
 
-  // Join an existing game
+ 
   joinGame() {
     const gameCode = prompt('Enter Game Code:');
     if (!gameCode) return;

@@ -98,6 +98,7 @@ export class MainPageComponent {
 
 import { Component, HostListener, OnInit } from '@angular/core';
 import { MessageEventsEnum, NewMovePayload } from '../shared/message-types';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-main-page',
@@ -107,6 +108,14 @@ import { MessageEventsEnum, NewMovePayload } from '../shared/message-types';
 export class MainPageComponent implements OnInit {
   currentTurn: string = 'PLAYER_ONE'; // Start with Player 1
   lastMove: string = ''; // Track the last move to prevent duplicates
+
+
+  constructor(private router: Router) {}
+
+  navigateToGame() {
+    this.router.navigate(['/game']); // Navigate to GameComponent
+  }
+
 
   ngOnInit() {
     // Load game state from LocalStorage

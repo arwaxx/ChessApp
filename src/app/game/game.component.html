@@ -4,13 +4,16 @@
   </div>
   
   <div *ngIf="gameId">
-    <h2>Game Code: <strong>{{ gameId }}</strong></h2> <!-- Display the Game Code -->
+    <h2>Game Code: <strong>{{ gameId }}</strong></h2>
     <ngx-chess-board
       #board
       [showCoordinates]="true"
       [dragEnabled]="!isOpponentTurn"
       (moveChange)="onMoveChange($event)"
     ></ngx-chess-board>
-    <h3 *ngIf="isOpponentTurn">Waiting for opponent's move...</h3>
+  </div>
+  
+  <div *ngIf="!gameId && gameId !== null">
+    <p>Game ID is not set. Please refresh or click "Create New Game."</p>
   </div>
   

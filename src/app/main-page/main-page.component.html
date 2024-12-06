@@ -1,7 +1,9 @@
 <div class="chess-match-container">
     <h1>Chess Match</h1>
     <div class="controls">
-      <button class="btn-reset" (click)="resetGame()">Create New Game</button>
+      <button class="btn-reset" (click)="navigateToGame()">Play Online</button>
+      
+      <button class="btn-reset" (click)="resetGame()">Create Offline Match</button>
       <p>Current Turn: {{ currentTurn === 'PLAYER_ONE' ? 'White (Player 1)' : 'Black (Player 2)' }}</p>
     </div>
   

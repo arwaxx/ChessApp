@@ -9,6 +9,7 @@
     border: 2px solid #ddd;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    
   }
   
   /* Header */
@@ -34,6 +35,7 @@
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-right: 10px;
   }
   
   .controls .btn-reset:hover {
@@ -78,4 +80,5 @@
       margin-bottom: 20px;
     }
   }
+  
   
