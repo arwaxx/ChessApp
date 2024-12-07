@@ -1,19 +1,16 @@
 <div *ngIf="!gameId">
-    <button (click)="createGame()">Create New Game</button>
-    <button (click)="joinGame()">Join Game</button>
+    <button class="btn-reset" (click)="createGame()">Create New Game</button>
+    <button class="btn-reset" (click)="joinGame()">Join Game</button>
   </div>
   
   <div *ngIf="gameId">
     <h2>Game Code: <strong>{{ gameId }}</strong></h2>
+    <p>{{ gameStatusMessage }}</p>
     <ngx-chess-board
       #board
       [showCoordinates]="true"
       [dragEnabled]="!isOpponentTurn"
       (moveChange)="onMoveChange($event)"
     ></ngx-chess-board>
-  </div>
-  
-  <div *ngIf="!gameId && gameId !== null">
-    <p>Game ID is not set. Please refresh or click "Create New Game."</p>
   </div>
   
