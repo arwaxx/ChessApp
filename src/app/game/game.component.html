@@ -9,7 +9,9 @@
     <ngx-chess-board
       #board
       [showCoordinates]="true"
-      [dragEnabled]="!isOpponentTurn"
+      [dragEnabled]="!isOpponentTurn" 
+      [darkDisabled]="isOpponentTurn" 
+      [lightDisabled]="isOpponentTurn" 
       (moveChange)="onMoveChange($event)"
     ></ngx-chess-board>
   </div>

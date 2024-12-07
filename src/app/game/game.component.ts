@@ -46,22 +46,23 @@ export class GameComponent implements OnInit {
     }
   }
 
+  // Join an existing game
   joinGame() {
     const gameCode = prompt('Enter Game Code:');
     if (!gameCode) return;
-  
+
     this.gameId = gameCode; // Assign the entered Game Code
     this.playerId = 'playerTwo'; // Assign Player Two
     this.isBoardReversed = true; // Reverse board for Player Two
     update(ref(this.db, `games/${gameCode}`), { playerTwo: this.playerId });
-  
+
     this.listenForGameUpdates(); // Start listening for updates
   }
-  
 
   // Handle move change on the chessboard
   onMoveChange(event: any) {
     if (this.isDisabled || !this.gameId) {
+      // Exit if the board is disabled or no game is active
       return;
     }
 
@@ -87,10 +88,9 @@ export class GameComponent implements OnInit {
       const game = snapshot.val();
       if (game) {
         console.log('Game Updated:', game); // Debugging: Log game updates
-        this.isOpponentTurn = game.currentTurn !== this.playerId;
 
-        // Disable board if it's the opponent's turn
-        this.isDisabled = this.isOpponentTurn;
+        this.isOpponentTurn = game.currentTurn !== this.playerId; // Update turn
+        this.isDisabled = this.isOpponentTurn; // Disable board if it's the opponent's turn
 
         // Update board state if it has changed
         if (this.board.getFEN() !== game.boardState) {
