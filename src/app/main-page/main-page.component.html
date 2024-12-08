@@ -1,15 +1,40 @@
 <div class="chess-match-container">
     <h1>Chess Match</h1>
+  
     <div class="controls">
-      <button class="btn-reset" (click)="navigateToGame()">Play Online</button>
-      
-      <button class="btn-reset" (click)="resetGame()">Create Offline Match</button>
-      <p>Current Turn: {{ currentTurn === 'PLAYER_ONE' ? 'White (Player 1)' : 'Black (Player 2)' }}</p>
+      <button 
+        class="btn-reset" 
+        (click)="navigateToGame()" 
+        aria-label="Start an online chess match">
+        Play Online
+      </button>
+  
+      <button 
+        class="btn-reset" 
+        (click)="resetGame()" 
+        aria-label="Create an offline chess match">
+        Create Offline Match
+      </button>
+  
+      <p class="current-turn">
+        Current Turn: 
+        <span>{{ currentTurn === 'PLAYER_ONE' ? 'White (Player 1)' : 'Black (Player 2)' }}</span>
+      </p>
     </div>
   
     <div class="iframes-container">
-      <iframe src="/player1" name="iframe1" class="iframe"></iframe>
-      <iframe src="/player2" name="iframe2" class="iframe"></iframe>
+      <iframe 
+        src="/player1" 
+        name="iframe1" 
+        class="iframe" 
+        title="Player 1 Board">
+      </iframe>
+      <iframe 
+        src="/player2" 
+        name="iframe2" 
+        class="iframe" 
+        title="Player 2 Board">
+      </iframe>
     </div>
   </div>
   

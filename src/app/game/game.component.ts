@@ -20,12 +20,15 @@ export class GameComponent implements OnInit {
   constructor(private db: Database) {}
 
   ngOnInit() {
-    this.gameId = null; // Reset gameId
-    console.log('Game ID reset:', this.gameId); // Debugging
+    this.resetGameId(); // Ensure the game ID is reset on initialization
+  }
+
+  private resetGameId() {
+    this.gameId = null;
   }
 
   // Create a new game
-  createGame() {
+  public createGame() {
     this.playerId = 'playerOne'; // Assign Player One
     const gameData = {
       playerOne: this.playerId,
@@ -39,32 +42,29 @@ export class GameComponent implements OnInit {
 
     if (gameRef.key) {
       this.gameId = gameRef.key; // Assign the Firebase-generated Game ID
-      console.log('Game ID Created:', this.gameId); // Debugging: Log the generated Game ID
       this.listenForGameUpdates(); // Start listening for updates
     } else {
-      console.error('Failed to generate Game ID');
+      throw new Error('Failed to generate Game ID');
     }
   }
 
   // Join an existing game
-  joinGame() {
+  public joinGame() {
     const gameCode = prompt('Enter Game Code:');
     if (!gameCode) return;
 
     this.gameId = gameCode; // Assign the entered Game Code
     this.playerId = 'playerTwo'; // Assign Player Two
     this.isBoardReversed = true; // Reverse board for Player Two
+
     update(ref(this.db, `games/${gameCode}`), { playerTwo: this.playerId });
 
     this.listenForGameUpdates(); // Start listening for updates
   }
 
   // Handle move change on the chessboard
-  onMoveChange(event: any) {
-    if (this.isDisabled || !this.gameId) {
-      // Exit if the board is disabled or no game is active
-      return;
-    }
+  public onMoveChange(event: any) {
+    if (this.isDisabled || !this.gameId) return; // Exit if the board is disabled or no game is active
 
     const newBoardState = this.board.getFEN();
     const nextTurn = this.playerId === 'playerOne' ? 'playerTwo' : 'playerOne';
@@ -72,55 +72,57 @@ export class GameComponent implements OnInit {
     update(ref(this.db, `games/${this.gameId}`), {
       boardState: newBoardState,
       currentTurn: nextTurn,
-    }).then(() => {
-      console.log(`Move recorded. Next turn: ${nextTurn}`);
     }).catch((error) => {
-      console.error('Error updating move:', error);
+      throw new Error(`Error updating move: ${error.message}`);
     });
   }
 
   // Listen for real-time game updates
-  listenForGameUpdates() {
+  private listenForGameUpdates() {
     if (!this.gameId) return;
 
     const gameRef = ref(this.db, `games/${this.gameId}`);
     onValue(gameRef, (snapshot) => {
       const game = snapshot.val();
-      if (game) {
-        console.log('Game Updated:', game); // Debugging: Log game updates
+      if (!game) throw new Error('Game data not found!');
 
-        this.isOpponentTurn = game.currentTurn !== this.playerId; // Update turn
-        this.isDisabled = this.isOpponentTurn; // Disable board if it's the opponent's turn
-
-        // Update board state if it has changed
-        if (this.board.getFEN() !== game.boardState) {
-          this.board.setFEN(game.boardState);
-        }
-
-        // Reverse board for Player Two
-        if (this.isBoardReversed) {
-          this.board.reverse();
-        }
-
-        // Update the game status message
-        this.gameStatusMessage = this.isOpponentTurn
-          ? "Opponent's Turn"
-          : 'Your Turn';
-
-        // Handle game completion
-        if (game.gameStatus === 'COMPLETED') {
-          alert('Game Over!');
-          this.gameId = null;
-          this.gameStatusMessage = 'Game Over!';
-        }
-      } else {
-        console.error('Game data not found!');
-      }
+      this.updateGameState(game);
     });
   }
 
+  private updateGameState(game: any) {
+    this.isOpponentTurn = game.currentTurn !== this.playerId; // Update turn
+    this.isDisabled = this.isOpponentTurn; // Disable board if it's the opponent's turn
+
+    // Update board state if it has changed
+    if (this.board.getFEN() !== game.boardState) {
+      this.board.setFEN(game.boardState);
+    }
+
+    // Reverse board for Player Two
+    if (this.isBoardReversed) {
+      this.board.reverse();
+    }
+
+    // Update the game status message
+    this.gameStatusMessage = this.isOpponentTurn
+      ? "Opponent's Turn"
+      : 'Your Turn';
+
+    // Handle game completion
+    if (game.gameStatus === 'COMPLETED') {
+      this.handleGameCompletion();
+    }
+  }
+
+  private handleGameCompletion() {
+    alert('Game Over!');
+    this.gameId = null;
+    this.gameStatusMessage = 'Game Over!';
+  }
+
   @HostListener('window:beforeunload')
-  saveGameState() {
+  private saveGameState() {
     if (!this.gameId) return;
 
     const state = this.board.getFEN();

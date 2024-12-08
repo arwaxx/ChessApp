@@ -1,144 +1,3 @@
-/**import {
-  Component,
-  Input,
-  OnInit,
-  HostListener,
-  ViewChild,
-} from '@angular/core';
-import { NgxChessBoardView } from 'ngx-chess-board';
-import { ActivatedRoute } from '@angular/router';
-import { MessageEventsEnum } from '../shared/message-types';
-
-@Component({
-  selector: 'app-player-board',
-  templateUrl: './player-board.component.html',
-  styleUrls: ['./player-board.component.css'],
-})
-export class PlayerBoardComponent implements OnInit {
-  @Input() currentTurn: string = ''; // Current turn: "PLAYER_ONE" or "PLAYER_TWO"
-  @ViewChild('board', { static: false }) board!: NgxChessBoardView;
-  playerName: string = ''; // Player name: "PLAYER_ONE" or "PLAYER_TWO"
-  savedStateKey!: string; // Key for saving game state in LocalStorage
-  isDisabled: boolean = false; // Whether the board interaction is disabled
-  isReversed: boolean = false; // Track if the board is reversed
-
-  constructor(private route: ActivatedRoute) {}
-
-  ngOnInit() {
-    // Determine player name from route data
-    this.playerName = this.route.snapshot.data['playerName'];
-    this.savedStateKey = `${this.playerName}_game_state`;
-
-    // Load the saved state if available
-    try {
-      const savedState = localStorage.getItem(this.savedStateKey);
-      if (savedState) {
-        this.board.setFEN(savedState);
-      }
-    } catch (error) {
-      console.error('Failed to load game state:', error);
-    }
-
-    // Reverse the board for Player Two
-    if (this.playerName === 'PLAYER_TWO') {
-      this.reverseBoard();
-    }
-  }
-
-  @HostListener('window:message', ['$event'])
-  handleNewMessage(event: MessageEvent) {
-    const { type, payload } = event.data;
-
-    switch (type) {
-      case MessageEventsEnum.MOVE_PIECE:
-        this.board.move(payload.move);
-        this.checkForCheckmate();
-        break;
-
-      case MessageEventsEnum.RESET_GAME:
-        this.board.reset();
-        localStorage.removeItem(this.savedStateKey);
-        break;
-
-      case MessageEventsEnum.DISABLE_TILES:
-        this.isDisabled = true;
-        break;
-
-      case MessageEventsEnum.ENABLE_TILES:
-        this.isDisabled = false;
-        break;
-
-      case MessageEventsEnum.REVERSE:
-        this.reverseBoard();
-        break;
-
-      case MessageEventsEnum.RESTORE:
-        this.restoreBoard();
-        break;
-
-      default:
-        console.warn('Unknown message type received:', type);
-    }
-  }
-
-  reverseBoard() {
-    this.board.reverse();
-    this.isReversed = true; // Mark board as reversed
-    console.log(`Board reversed for ${this.playerName}`);
-  }
-
-  restoreBoard() {
-    if (this.isReversed) {
-      this.board.reverse(); // Restore original position
-      this.isReversed = false; // Mark board as not reversed
-      console.log(`Board restored for ${this.playerName}`);
-    }
-  }
-
-  @HostListener('window:beforeunload')
-  saveGameState() {
-    try {
-      const state = this.board.getFEN();
-      localStorage.setItem(this.savedStateKey, state);
-    } catch (error) {
-      console.error('Failed to save game state:', error);
-    }
-  }
-
-  onMoveChange(event: any) {
-    const move = event.move;
-
-    // Notify the parent about the move
-    window.parent.postMessage(
-      {
-        type: MessageEventsEnum.NEW_MOVE,
-        payload: {
-          move,
-          fromPlayer: this.playerName,
-          toPlayer:
-            this.playerName === 'PLAYER_ONE' ? 'PLAYER_TWO' : 'PLAYER_ONE',
-        },
-      },
-      '*'
-    );
-
-    this.checkForCheckmate();
-  }
-
-  checkForCheckmate() {
-    const moveHistory = this.board.getMoveHistory();
-
-    if (moveHistory.some((move: any) => move.endsWith('#'))) {
-      window.parent.postMessage(
-        {
-          type: MessageEventsEnum.CHECK_MATE,
-          payload: { winner: this.playerName },
-        },
-        '*'
-      );
-    }
-  }
-}**/
 
 import {
   Component,
@@ -160,37 +19,41 @@ import { NgZone } from '@angular/core';
 export class PlayerBoardComponent implements OnInit {
   @Input() currentTurn: string = '';
   @ViewChild('board', { static: false }) board!: NgxChessBoardView;
+
   playerName: string = '';
   savedStateKey!: string; // LocalStorage key
-  isDisabled: boolean = false;
+  isDisabled: boolean = false; // To disable moves when the game is over
   isReversed: boolean = false;
+  gameOver: boolean = false; // To track if the game is over
 
   constructor(private route: ActivatedRoute, private ngZone: NgZone) {}
 
-ngOnInit() {
-  this.playerName = this.route.snapshot.data['playerName'];
-  this.savedStateKey = `${this.playerName}_game_state`;
+  ngOnInit() {
+    this.initializePlayer();
+    this.restoreSavedState();
+  }
 
-  this.ngZone.runOutsideAngular(() => {
-    setTimeout(() => {
-      const savedState = localStorage.getItem(this.savedStateKey);
-      if (savedState ) {
-        console.log(`Restoring board state for ${this.playerName}:`, savedState);
-        this.board.setFEN(savedState); // Restore the board to the saved position
+  private initializePlayer() {
+    this.playerName = this.route.snapshot.data['playerName'];
+    this.savedStateKey = `${this.playerName}_game_state`;
+  }
 
+  private restoreSavedState() {
+    this.ngZone.runOutsideAngular(() => {
+      setTimeout(() => {
+        const savedState = localStorage.getItem(this.savedStateKey);
+        if (savedState) {
+          this.board.setFEN(savedState); // Restore the board to the saved position
 
-      } 
-
-      if (this.playerName === 'PLAYER_TWO') {
-        this.reverseBoard
-      }
-
-
-    }, 0);
-  });
-}
-
-
+          if (this.playerName === 'PLAYER_TWO') {
+            this.reverseBoard();
+          } else if (this.playerName === 'PLAYER_ONE') {
+            this.restoreBoard();
+          }
+        }
+      }, 0);
+    });
+  }
 
   @HostListener('window:message', ['$event'])
   handleNewMessage(event: MessageEvent) {
@@ -198,21 +61,15 @@ ngOnInit() {
 
     switch (type) {
       case MessageEventsEnum.MOVE_PIECE:
-        this.board.move(payload.move);
-        this.saveGameState();
-        this.checkForCheckmate();
+        this.handleMovePiece(payload.move);
         break;
 
       case MessageEventsEnum.RESET_GAME:
-        this.board.reset();
-        localStorage.removeItem(this.savedStateKey);
+        this.resetGame();
         break;
 
       case MessageEventsEnum.LOAD_GAME:
-        const savedState = localStorage.getItem(this.savedStateKey);
-        if (savedState) {
-          this.board.setFEN(savedState);
-        }
+        this.loadGame();
         break;
 
       case MessageEventsEnum.DISABLE_TILES:
@@ -236,6 +93,30 @@ ngOnInit() {
     }
   }
 
+  private handleMovePiece(move: string) {
+    if (this.gameOver) {
+      return; // Skip the move if the game is over
+    }
+
+    this.board.move(move);
+    this.saveGameState();
+    this.checkForCheckmate();
+  }
+
+  private resetGame() {
+    this.board.reset();
+    localStorage.removeItem(this.savedStateKey);
+    this.gameOver = false; // Reset the game over flag
+    this.isDisabled = false; // Enable moves again
+  }
+
+  private loadGame() {
+    const savedState = localStorage.getItem(this.savedStateKey);
+    if (savedState) {
+      this.board.setFEN(savedState);
+    }
+  }
+
   @HostListener('window:beforeunload')
   saveGameState() {
     const state = this.board.getFEN();
@@ -254,7 +135,13 @@ ngOnInit() {
     }
   }
 
+  
+
   onMoveChange(event: any) {
+    if (this.gameOver) {
+      return; // Skip move if the game is over
+    }
+
     const move = event.move;
 
     window.parent.postMessage(
@@ -274,10 +161,14 @@ ngOnInit() {
     this.checkForCheckmate();
   }
 
-  checkForCheckmate() {
+  private checkForCheckmate() {
     const moveHistory = this.board.getMoveHistory();
 
+    // Check if the last move ends with '#', which means checkmate
     if (moveHistory.some((move: any) => move.endsWith('#'))) {
+      // When checkmate is detected, show the alert
+      this.gameOver = true; // Set game over state
+      this.isDisabled = true; // Disable further moves
       window.parent.postMessage(
         {
           type: MessageEventsEnum.CHECK_MATE,
@@ -285,6 +176,16 @@ ngOnInit() {
         },
         '*'
       );
+      alert(`Checkmate! ${this.playerName} wins!`);
     }
+  }
+
+  // Method to handle the "Create New Game" action
+  createNewGame() {
+    this.board.reset(); // Reset the board
+    this.gameOver = false; // Reset game-over state
+    this.isDisabled = false; // Enable moves again
+    this.saveGameState(); // Save the new game state
+    alert("A new game has started!");
   }
 }
